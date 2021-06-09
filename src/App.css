@@ -134,8 +134,30 @@
   width: 15px;
 }
 
-.sender-email {
+.form-header input {
   padding: 5px;
+  border: none;
+  outline: none;
+  display: block;
+  width: 300px;
+  font-size: inherit;
+  text-decoration: underline;
+}
+
+.form-header label {
+  font-size: 0.8rem;
+  color: gray;
+}
+
+.email-info-container {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  align-items: center;
+}
+
+.email-form input:focus {
+  border: none;
+  outline: none;
 }
 
 textarea {
@@ -181,6 +203,14 @@ textarea:focus {
   display: grid;
   grid-auto-flow: column;
   justify-content: space-between;
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+
+  border-radius: 100%;
+  background-color: #eee;
 }
 
 /* header */
