@@ -10,72 +10,28 @@ function App() {
   // Use initialEmails for state
   
   const [emails, setEmails] = useState(initialEmails)
-  const [displayEmail, setDisplay] = useState(emails)
   const [hideRead, setHideRead] = useState(false)
   const [currentSection, setSection] = useState("inbox")
-  const [unreadCount, setUnreadCount] = useState(3)
-  const [starCount, setStarCount] = useState(2)
 
-  function updateUnreadCount(emailList){
-    let unreadEmailList = emailList.filter(target=> target.read === false)
-    setUnreadCount(unreadEmailList.length)
-  }
+  const unreadCount = emails.filter(email => !email.read).length
+  const starCount = emails.filter(email => email.starred).length
+  const emailToRender = currentSection ==="inbox"? hideRead? emails.filter(email=> !email.read) : emails: hideRead? emails.filter(email=> email.starred && !email.read) : emails.filter(email=>email.starred)
 
-  function updateStarCount(emailList){
-    let starredEmailList = emailList.filter(target=> target.starred === true)
-    setStarCount(starredEmailList.length)
-  }
-
-  function displayUnread(event){
-    if(event.target.checked === true){
-    setHideRead(true)
-    setDisplay(displayEmail.filter(email=> email.read===false))
-    }
-    else{
-    setHideRead(false)
-      if (currentSection === "starred") filterStarredEmail()
-      if (currentSection === "inbox") setDisplay(emails)
-    }
-  }
-
-  function filterStarredEmail (){
-    let starredEmail = emails.filter(email=> email.starred===true)
-    setDisplay(starredEmail)
-    setSection("starred")
-  }
-
-  function updateRead(event, email){
-    let updatedEmail = {...email, read: event.target.checked}
-    let emailIndex = emails.findIndex((target)=> email.id===target.id)
-    let newEmailList = [...emails]
-    newEmailList.splice(emailIndex, 1 , updatedEmail)
-    setEmails([...newEmailList])
-
-    let displayIndex = displayEmail.findIndex((target)=> email.id===target.id)
-    let newDisplayEmailList = [...displayEmail]
-    newDisplayEmailList.splice(displayIndex, 1 , updatedEmail)
-    setDisplay([...newDisplayEmailList])
-
-    updateUnreadCount(newEmailList)
+  function updateRead(email){
+    let newEmailsList = emails.map(function(target){
+      if(target.id === email.id) return {...email, read: !email.read}
+      return target
+    })
+    setEmails(newEmailsList)
   }
 
   function updateStarred(email){
-    let updatedStar = !email.starred
-    let updatedEmail = {...email, starred: updatedStar}
-
-    let emailIndex = emails.findIndex((target)=> email.id===target.id)
-    let newEmailList = [...emails]
-    newEmailList.splice(emailIndex, 1 , updatedEmail)
-    setEmails([...newEmailList])
-
-    let displayIndex = displayEmail.findIndex((target)=> email.id===target.id)
-    let newDisplayEmailList = [...displayEmail]
-    newDisplayEmailList.splice(displayIndex, 1 , updatedEmail)
-    setDisplay([...newDisplayEmailList])
-    updateStarCount(newEmailList)
+   let newEmailsList = emails.map(function(target){
+     if(target.id === email.id) return {...email, starred: !email.starred}
+     return target
+   })
+   setEmails(newEmailsList)
   }
-
-  
 
   return (
     <div className="app">
@@ -85,7 +41,6 @@ function App() {
           <li
             className={"item "+ (currentSection === "inbox"? 'active' : '')}
             onClick={() => {
-              setDisplay(emails)
               setSection("inbox")
             }}
           >
@@ -94,19 +49,19 @@ function App() {
           </li>
           <li
             className={"item "+ (currentSection === "starred"? 'active' : '')}
-            onClick={() => {filterStarredEmail()}}
+            onClick={() => { setSection("starred")}}
           >
             <span className="label">Starred</span>
             <span className="count">{starCount}</span>
           </li>
 
           <li className="item toggle">
-            <label for="hide-read">Hide read</label>
+            <label htmlFor="hide-read">Hide read</label>
             <input
               id="hide-read"
               type="checkbox"
               checked={hideRead}
-              onChange={(event)=>displayUnread(event)}
+              onChange={(event)=>setHideRead(event.target.checked)}
             />
           </li>
         </ul>
@@ -114,16 +69,13 @@ function App() {
       <main className="emails">{
       <ul>
       
-       {displayEmail.map(email => (
-        <li className={"email " + (email.read? 'read' : 'unread')}>
-        <input id="read" type="checkbox" onChange={(event)=>updateRead(event, email)} checked={email.read}/>
-        
-        <img class="star" 
-        src={(email.starred? 'https://www.gstatic.com/images/icons/material/system/1x/star_googyellow500_20dp.png' : 'https://www.gstatic.com/images/icons/material/system/1x/star_border_black_20dp.png')}
-        onClick={()=>updateStarred(email)}/>
+       {emailToRender.map(email => (
+        <li key={email.id} className={"email " + (email.read? 'read' : 'unread')}>
+        <input id="read" type="checkbox" onChange={()=>updateRead(email)} checked={email.read}/>
+        <input className="star-checkbox" id="star" type="checkbox" onChange={()=>updateStarred(email)} checked={email.starred}/>
         
         <span>{email.sender}</span>
-        <span class="title">{email.title}</span>
+        <span className="title">{email.title}</span>
       </li>
       ))} 
     </ul>
